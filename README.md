@@ -6,7 +6,7 @@ To use it, open `Chrome DevTools` in your browser, and click on the `Console` ta
 
 Copy the following code in `totalSpend.js` and paste it into the console.
 
-To calculate the total spend, you need to login first to the site. you want to calculate the total spend of.
+To calculate the total spend, you need to login first to the site that you want to calculate the total spend of. For Lazada site, you need to visit 'My order' in order to calculate this.
 
 Then, call the following function to calculate the total spend.
   - `shopee()` to calculate the total spend in Shopee site.
