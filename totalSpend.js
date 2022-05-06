@@ -238,26 +238,37 @@ function moneyFormat(number, fixed = 0) {
 }
 
 function printAndReset() {
-  console.log(
-    "%cTổng đơn hàng đã giao: " + "%c" + moneyFormat(totalOrders),
-    "font-size: 30px;",
-    "font-size: 30px; color:red"
-  );
-  console.log(
-    "%cTổng sản phẩm đã đặt: " + "%c" + moneyFormat(totalItems),
-    "font-size: 30px;",
-    "font-size: 30px; color:red"
-  );
-  console.log(
-    "%cTổng chi tiêu: " + "%c" + moneyFormat(totalSpent) + "đ",
-    "font-size: 30px;",
-    "font-size: 30px; color:red"
-  );
-  console.log(
-    "%cTổng tiền ship: " + "%c" + moneyFormat(totalShippingSpent) + "đ",
-    "font-size: 30px;",
-    "font-size: 30px; color:red"
-  );
+  if (totalOrders && totalItems && totalSpent) {
+    console.log(
+      "%cTổng đơn hàng đã giao: " + "%c" + moneyFormat(totalOrders),
+      "font-size: 30px;",
+      "font-size: 30px; color:red"
+    );
+    console.log(
+      "%cTổng sản phẩm đã đặt: " + "%c" + moneyFormat(totalItems),
+      "font-size: 30px;",
+      "font-size: 30px; color:red"
+    );
+    console.log(
+      "%cTổng chi tiêu: " + "%c" + moneyFormat(totalSpent) + "đ",
+      "font-size: 30px;",
+      "font-size: 30px; color:red"
+    );
+    console.log(
+      "%cTổng tiền ship: " + "%c" + moneyFormat(totalShippingSpent) + "đ",
+      "font-size: 30px;",
+      "font-size: 30px; color:red"
+    );
+  } else {
+    console.log(
+      "%cChúc mừng bạn vì đã chưa dính phải cơn nghiện mua sắm vì bạn đã chi: " +
+        "%c" +
+        moneyFormat(totalSpent) +
+        "đ ",
+      "font-size: 30px;",
+      "font-size: 30px; color:red"
+    );
+  }
 
   totalOrders = 0;
   totalItems = 0;
