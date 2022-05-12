@@ -90,55 +90,88 @@ function lazada() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
-      orders = JSON.parse(this.responseText)["module"]["data"];
+      orders = JSON.parse(this.responseText)["module"];
 
-      for (const [key, value] of Object.entries(orders)) {
-        if (key.startsWith("order_")) {
-          totalOrders += 1;
+      let totalOrdersReq = new XMLHttpRequest();
+      totalOrdersReq.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          let totalOrdersLazada = JSON.parse(this.responseText)["module"][
+            "data"
+          ];
+          for (const [key, value] of Object.entries(totalOrdersLazada)) {
+            if (key.startsWith("order_")) {
+              totalOrders += 1;
 
-          let groupId = orders[key]["fields"]["groupId"];
-          let tradeOrderId = orders[key]["fields"]["tradeOrderId"];
+              let groupId = totalOrdersLazada[key]["fields"]["groupId"];
+              let tradeOrderId =
+                totalOrdersLazada[key]["fields"]["tradeOrderId"];
 
-          let detailReq = new XMLHttpRequest();
-          detailReq.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-              let orderDetail = JSON.parse(this.responseText)["module"]["data"];
-              let price =
-                orderDetail["totalSummary_" + tradeOrderId]["fields"][
-                  "total"
-                ] || 0;
-              let shipping_fee =
-                orderDetail["totalSummary_" + tradeOrderId]["fields"][
-                  "fees"
-                ].find((fee) => fee.key === "Shipping Fee").value || 0;
+              let detailReq = new XMLHttpRequest();
+              detailReq.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                  let orderDetail = JSON.parse(this.responseText)["module"][
+                    "data"
+                  ];
+                  let price =
+                    orderDetail["totalSummary_" + tradeOrderId]["fields"][
+                      "total"
+                    ];
+                  let shipping_fee = orderDetail[
+                    "totalSummary_" + tradeOrderId
+                  ]["fields"]["fees"].find(
+                    (fee) => fee.key === "Shipping Fee"
+                  ).value;
 
-              totalSpent += parseInt(price.split(" ")[1].replace(",", ""));
-              totalShippingSpent += parseInt(
-                shipping_fee.split(" ")[1].replace(",", "")
+                  totalSpent += parseInt(price.split(" ")[1].replace(",", ""));
+                  totalShippingSpent += parseInt(
+                    shipping_fee.split(" ")[1].replace(",", "")
+                  );
+                }
+              };
+              detailReq.open(
+                "POST",
+                "https://my.lazada.vn/customer/api/sync/order-detail",
+                false
               );
+              detailReq.setRequestHeader(
+                "Content-Type",
+                "application/json;charset=UTF-8"
+              );
+              detailReq.send(
+                JSON.stringify({
+                  ultronVersion: "2.0",
+                  shopGroupKey: groupId,
+                  tradeOrderId: tradeOrderId,
+                })
+              );
+            } else if (key.startsWith("orderItem_")) {
+              totalItems += 1;
             }
-          };
-          detailReq.open(
-            "POST",
-            "https://my.lazada.vn/customer/api/sync/order-detail",
-            false
-          );
-          detailReq.setRequestHeader(
-            "Content-Type",
-            "application/json;charset=UTF-8"
-          );
-          detailReq.send(
-            JSON.stringify({
-              ultronVersion: "2.0",
-              shopGroupKey: groupId,
-              tradeOrderId: tradeOrderId,
-            })
-          );
-        } else if (key.startsWith("orderItem_")) {
-          totalItems += 1;
+          }
+          printAndReset();
         }
-      }
-      printAndReset();
+      };
+      totalOrdersReq.open(
+        "POST",
+        "https://my.lazada.vn/customer/api/sync/order-list",
+        true
+      );
+      totalOrdersReq.setRequestHeader(
+        "Content-Type",
+        "application/json;charset=UTF-8"
+      );
+      totalOrdersReq.send(
+        JSON.stringify({
+          operator: orders["data"].key,
+          data: orders["data"],
+          hierachy: orders["data"]["hierarchy"],
+          lifecycle: orders["data"]["lifecycle"],
+          linkage: orders["data"]["linkage"],
+          params: {
+            ultronVersion: "2.0",
+          },
+        })
+      );
     }
   };
   xhttp.open("POST", "https://my.lazada.vn/customer/api/sync/order-list", true);
